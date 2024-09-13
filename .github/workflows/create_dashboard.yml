@@ -1,0 +1,33 @@
+name: Create Datadog Dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'config/shopping-pwa/**'
+      - 'config/blossom-flex/**'
+
+jobs:
+  create_dashboard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create dashboard
+        # run: | 
+        #   curl -X GET "https://api.datadoghq.com/api/v1/validate" \
+        #     -H "Accept: application/json" \
+        #     -H "DD-API-KEY: {{}}" \
+        #     -H "DD-APPLICATION-KEY: {{}}" \
+        run: |
+          experiment_name=$(basename "$1" .ts)
+          json_payload=$(cat dashboard.json | sed "s/\"dashboard_title\": \".*\"/\"dashboard_title\": \"$experiment_name\"/")
+          
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: {{}}" \
+            -H "DD-APPLICATION-KEY: {{}}" \
+            -d "$json_payload"
+            "https://api.datadoghq.com/api/v1/dashboard"
